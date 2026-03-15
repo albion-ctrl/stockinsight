@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 222 25% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 25% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 25% 10%;
+    --primary: 350 85% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 15% 94%;
+    --secondary-foreground: 222 15% 30%;
+    --muted: 210 15% 94%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 15% 94%;
+    --accent-foreground: 222 25% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 214 15% 88%;
+    --input: 214 15% 88%;
+    --ring: 350 85% 42%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* ─── Custom utilities ─────────────────────────────── */
+@layer components {
+  .brand-gradient { background: linear-gradient(135deg, #C8102E 0%, #8B0B1F 100%); }
+  .brand-gradient-subtle { background: linear-gradient(135deg, rgba(200,16,46,0.06) 0%, rgba(200,16,46,0.02) 100%); }
+
+  .glass { @apply bg-white/90 backdrop-blur-md border border-white/60; }
+
+  .status-pill-green  { @apply bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium px-2 py-0.5 rounded-full; }
+  .status-pill-amber  { @apply bg-amber-50 text-amber-700 border border-amber-200 text-xs font-medium px-2 py-0.5 rounded-full; }
+  .status-pill-red    { @apply bg-red-50 text-red-700 border border-red-200 text-xs font-medium px-2 py-0.5 rounded-full; }
+
+  .mono { font-family: 'DM Mono', monospace; }
+
+  .interest-counter {
+    font-family: 'DM Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  .market-source-autoscout  { @apply bg-[#003087]/10 text-[#003087] border border-[#003087]/20; }
+  .market-source-gaspedaal  { @apply bg-[#E95B1A]/10 text-[#E95B1A] border border-[#E95B1A]/20; }
+  .market-source-marktplaats { @apply bg-[#F58220]/10 text-[#D4700E] border border-[#F58220]/20; }
+
+  .urgency-critical { @apply bg-red-50 border-l-4 border-l-red-500; }
+  .urgency-high     { @apply bg-amber-50 border-l-4 border-l-amber-500; }
+  .urgency-medium   { @apply bg-blue-50 border-l-4 border-l-blue-400; }
+  .urgency-low      { @apply bg-gray-50 border-l-4 border-l-gray-300; }
+}
+
+/* ─── Scrollbar ──────────────────────────────────────── */
+.thin-scroll::-webkit-scrollbar { width: 3px; height: 3px; }
+.thin-scroll::-webkit-scrollbar-track { background: transparent; }
+.thin-scroll::-webkit-scrollbar-thumb { background: hsl(214 15% 82%); border-radius: 2px; }
+
+/* ─── Progress bar variants ──────────────────────────── */
+.bar-green  { background: linear-gradient(90deg, #10b981, #34d399); }
+.bar-amber  { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.bar-red    { background: linear-gradient(90deg, #C8102E, #ef4444); }
+
+/* ─── Ticker animation ───────────────────────────────── */
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.ticker-inner { display: flex; animation: ticker 30s linear infinite; }
+.ticker-inner:hover { animation-play-state: paused; }
