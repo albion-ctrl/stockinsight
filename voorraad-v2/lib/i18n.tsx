@@ -131,9 +131,6 @@ const translations: Record<string, { en: string; nl: string }> = {
   "label.manager": { en: "Manager", nl: "Manager" },
   "label.allBranches": { en: "All branches", nl: "Alle vestigingen" },
   
-  // Navigation
-  "nav.back": { en: "Back", nl: "Terug" },
-  
   // Settings
   "settings.profile": { en: "Profile", nl: "Profiel" },
   "settings.name": { en: "Name", nl: "Naam" },
