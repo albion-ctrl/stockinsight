@@ -9,7 +9,7 @@ import { LangToggle } from "@/components/ui/LangToggle";
 import { KPIBar } from "@/components/dashboard/KPIBar";
 import { VehicleCard } from "@/components/dashboard/VehicleCard";
 import { VehicleDetail } from "@/components/dashboard/VehicleDetail";
-import { Search, Filter, X, ChevronDown, Truck, BarChart3 } from "lucide-react";
+import { Search, Filter, X, ChevronDown, Truck, BarChart3, Menu, ArrowLeft } from "lucide-react";
 
 const DEMO_USER = { name: "Thomas de Vries", role: "Manager", initials: "TD" };
 
@@ -21,6 +21,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<FilterState>({ branch:"all", type:"all", brand:"all", status:"all", search:"" });
   const [showFilters, setShowFilters] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileView, setMobileView] = useState<"list" | "detail">("list");
 
   const BRAND_OPTIONS = [
     ["all", t("filter.allBrands")],
@@ -79,6 +81,15 @@ export default function DashboardPage() {
     }));
   };
 
+  const handleVehicleSelect = (id: string) => {
+    setSelectedId(id);
+    setMobileView("detail");
+  };
+
+  const handleBackToList = () => {
+    setMobileView("list");
+  };
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-[#F2F3F5]">
@@ -92,24 +103,30 @@ export default function DashboardPage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-[#F2F3F5]">
-      <header className="bg-white border-b border-border flex items-center px-4 py-2.5 gap-3 flex-shrink-0 z-20">
-        <div className="flex items-center gap-2.5">
+      <header className="bg-white border-b border-border flex items-center px-3 py-2 gap-2 flex-shrink-0 z-20">
+        <button 
+          onClick={() => setMobileMenuOpen(true)}
+          className="lg:hidden p-1.5 -ml-1 hover:bg-secondary rounded-md"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg brand-gradient flex items-center justify-center text-white font-bold text-xs">DE</div>
           <div className="hidden sm:block">
             <div className="text-sm font-semibold leading-tight">StockInsight</div>
             <div className="text-[10px] text-muted-foreground leading-tight">Den Engelsen Commercial Vehicles</div>
           </div>
         </div>
-        <div className="hidden md:block w-px h-5 bg-border mx-1" />
-        <nav className="hidden md:flex items-center gap-1">
+        <div className="hidden lg:block w-px h-5 bg-border mx-1" />
+        <nav className="hidden lg:flex items-center gap-1">
           <button onClick={() => router.push('/dashboard')} className="px-3 py-1.5 text-xs font-medium text-brand bg-brand/5 rounded-md">{t('nav.dashboard')}</button>
           <button onClick={() => router.push('/reports')} className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary transition-colors">{t('nav.reports')}</button>
           <button onClick={() => router.push('/settings')} className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-secondary transition-colors">{t('nav.settings')}</button>
         </nav>
         <div className="flex-1" />
         <LangToggle />
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:block text-right">
+        <div className="hidden sm:flex items-center gap-2">
+          <div className="text-right">
             <div className="text-xs font-medium">{DEMO_USER.name}</div>
             <div className="text-[10px] text-muted-foreground">{t('label.manager')} · {t('label.allBranches')}</div>
           </div>
@@ -121,8 +138,11 @@ export default function DashboardPage() {
 
       <KPIBar kpi={kpi} />
 
-      <div className="flex flex-1 overflow-hidden">
-        <aside className="w-[340px] flex-shrink-0 flex flex-col bg-white border-r border-border overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
+        <aside className={cn(
+          "w-full lg:w-[340px] flex-shrink-0 flex flex-col bg-white border-r border-border overflow-hidden absolute lg:relative inset-0 z-10 transition-transform duration-300",
+          mobileView === "list" ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        )}>
           <div className="p-3 border-b border-border space-y-2 flex-shrink-0">
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -199,7 +219,7 @@ export default function DashboardPage() {
                     key={v.id}
                     vehicle={v}
                     isSelected={selectedId === v.id}
-                    onClick={() => setSelectedId(v.id)}
+                    onClick={() => handleVehicleSelect(v.id)}
                   />
                 ))}
               </div>
@@ -207,9 +227,22 @@ export default function DashboardPage() {
           </div>
         </aside>
 
-        <main className="flex-1 overflow-hidden">
+        <main className={cn(
+          "flex-1 overflow-hidden absolute lg:relative inset-0 transition-transform duration-300",
+          mobileView === "detail" ? "translate-x-0" : "translate-x-full lg:translate-x-0"
+        )}>
           {selected ? (
-            <VehicleDetail vehicle={selected} onToggleAction={toggleAction} />
+            <div className="h-full flex flex-col">
+              <div className="lg:hidden flex items-center gap-2 px-3 py-2 bg-white border-b border-border flex-shrink-0">
+                <button onClick={handleBackToList} className="p-1 hover:bg-secondary rounded-md">
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <span className="text-sm font-medium truncate">{selected.name}</span>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <VehicleDetail vehicle={selected} onToggleAction={toggleAction} />
+              </div>
+            </div>
           ) : (
             <div className="h-full flex items-center justify-center text-muted-foreground">
               <div className="text-center">
@@ -220,6 +253,51 @@ export default function DashboardPage() {
           )}
         </main>
       </div>
+
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileMenuOpen(false)} />
+          <div className="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-xl animate-in slide-in-from-left">
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <div className="text-sm font-semibold">Menu</div>
+              <button onClick={() => setMobileMenuOpen(false)} className="p-1 hover:bg-secondary rounded">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <nav className="p-2">
+              <button 
+                onClick={() => { router.push('/dashboard'); setMobileMenuOpen(false); }} 
+                className="w-full text-left px-3 py-2 text-sm font-medium text-brand bg-brand/5 rounded-md"
+              >
+                {t('nav.dashboard')}
+              </button>
+              <button 
+                onClick={() => { router.push('/reports'); setMobileMenuOpen(false); }} 
+                className="w-full text-left px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md"
+              >
+                {t('nav.reports')}
+              </button>
+              <button 
+                onClick={() => { router.push('/settings'); setMobileMenuOpen(false); }} 
+                className="w-full text-left px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md"
+              >
+                {t('nav.settings')}
+              </button>
+            </nav>
+            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-brand text-white flex items-center justify-center text-sm font-semibold">
+                  {DEMO_USER.initials}
+                </div>
+                <div>
+                  <div className="text-sm font-medium">{DEMO_USER.name}</div>
+                  <div className="text-xs text-muted-foreground">{DEMO_USER.role}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
