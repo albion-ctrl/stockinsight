@@ -58,6 +58,8 @@ const BRAND_LOGOS: Record<string, string> = {
   "Skoda": "https://1000logos.net/wp-content/uploads/2022/02/Logo-Skoda-1536x864.png",
   "Škoda": "https://1000logos.net/wp-content/uploads/2022/02/Logo-Skoda-1536x864.png",
   "Ford": "https://www.pngmart.com/files/4/Ford-Logo-PNG-Transparent-Image.png",
+  "Mercedes": "https://www.pngmart.com/files/22/1-Mercedes-Logo-Transparent.png",
+  "Mercedes-Benz": "https://www.pngmart.com/files/22/1-Mercedes-Logo-Transparent.png",
 };
 
 function getVehicleImageUrl(name: string, brand: string): string | null {
@@ -125,7 +127,7 @@ function getBrandLogo(brand: string): string | null {
   if (upperBrand === "OPEL") return BRAND_LOGOS["Opel"];
   if (upperBrand === "ŠKODA" || upperBrand === "SKODA") return BRAND_LOGOS["Skoda"];
   if (upperBrand === "FORD") return BRAND_LOGOS["Ford"];
-  if (upperBrand === "MERCEDES-BENZ" || upperBrand === "MERCEDES" || upperBrand === "MERC") return null;
+  if (upperBrand === "MERCEDES-BENZ" || upperBrand === "MERCEDES" || upperBrand === "MERC") return BRAND_LOGOS["Mercedes"];
   
   return null;
 }
