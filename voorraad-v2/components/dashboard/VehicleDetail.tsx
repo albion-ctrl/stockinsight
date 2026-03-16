@@ -40,10 +40,10 @@ export function VehicleDetail({ vehicle: v, onToggleAction }: Props) {
   };
 
   const ACTION_DESCS: Record<string, string> = {
-    price_reduction: "Vehicle has been in stock >30 days. Adjust price based on market recommendation.",
-    photo_update: "Vehicle has been in stock >45 days. Fresh photos increase interest by ~22%.",
-    call_prospect: "Vehicle has been in stock >60 days. Follow up with previously interested buyers.",
-    export_platform: "Vehicle has been in stock >90 days. List on TruckScout24 or Truck1.eu.",
+    price_reduction: lang === "nl" ? "Voertuig is >30 dagen in voorraad. Pas prijs aan op basis van marktadvies." : "Vehicle has been in stock >30 days. Adjust price based on market recommendation.",
+    photo_update: lang === "nl" ? "Voertuig is >45 dagen in voorraad. Nieuwe foto's verhogen interesse met ~22%." : "Vehicle has been in stock >45 days. Fresh photos increase interest by ~22%.",
+    call_prospect: lang === "nl" ? "Voertuig is >60 dagen in voorraad. Volg op met eerder geïnteresseerde kopers." : "Vehicle has been in stock >60 days. Follow up with previously interested buyers.",
+    export_platform: lang === "nl" ? "Voertuig is >90 dagen in voorraad. Plaats op TruckScout24 of Truck1.eu." : "Vehicle has been in stock >90 days. List on TruckScout24 or Truck1.eu.",
   };
 
   const sm = STATUS_MAP[v.status as keyof typeof STATUS_MAP] || STATUS_MAP.green;

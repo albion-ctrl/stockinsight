@@ -13,20 +13,6 @@ import { Search, Filter, X, ChevronDown, Truck, BarChart3 } from "lucide-react";
 
 const DEMO_USER = { name: "Thomas de Vries", role: "Manager", initials: "TD" };
 
-const BRAND_OPTIONS = [
-  ["all", "All brands"],
-  ["MAN", "MAN"],
-  ["VW", "VW"],
-  ["Ford", "Ford"],
-  ["Renault", "Renault"],
-  ["Mercedes-Benz", "Merc."],
-  ["Peugeot", "Peugeot"],
-  ["Citroën", "Citroën"],
-  ["Toyota", "Toyota"],
-  ["Škoda", "Škoda"],
-  ["Opel", "Opel"],
-] as [string, string][];
-
 export default function DashboardPage() {
   const router = useRouter();
   const { t } = useLang();
@@ -35,6 +21,20 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<FilterState>({ branch:"all", type:"all", brand:"all", status:"all", search:"" });
   const [showFilters, setShowFilters] = useState(false);
+
+  const BRAND_OPTIONS = [
+    ["all", t("filter.allBrands")],
+    ["MAN", "MAN"],
+    ["VW", "VW"],
+    ["Ford", "Ford"],
+    ["Renault", "Renault"],
+    ["Mercedes-Benz", "Merc."],
+    ["Peugeot", "Peugeot"],
+    ["Citroën", "Citroën"],
+    ["Toyota", "Toyota"],
+    ["Škoda", "Škoda"],
+    ["Opel", "Opel"],
+  ] as [string, string][];
 
   useEffect(() => {
     fetchVehicles().then(data => {
