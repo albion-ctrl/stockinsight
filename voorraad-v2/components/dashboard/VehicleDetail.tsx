@@ -58,61 +58,61 @@ export function VehicleDetail({ vehicle: v, onToggleAction }: Props) {
     <div className="h-full flex flex-col overflow-hidden animate-slide-in-right">
       <Tabs defaultValue="overview" className="flex flex-col h-full">
         {/* Header */}
-        <div className="bg-white border-b border-border px-5 py-4 flex-shrink-0">
-          <div className="flex items-start justify-between gap-4 mb-3">
-            <div className="flex items-start gap-3 min-w-0">
+        <div className="bg-white border-b border-border px-3 md:px-5 py-3 md:py-4 flex-shrink-0">
+          <div className="flex items-start justify-between gap-2 md:gap-4 mb-2 md:mb-3">
+            <div className="flex items-start gap-2 md:gap-3 min-w-0">
               <VehicleImage
                 src={v.image_url}
                 alt={v.name}
                 brand={v.brand}
                 type={v.type}
-                className="w-20 h-14 flex-shrink-0"
+                className="w-16 md:w-20 h-12 md:h-14 flex-shrink-0"
               />
               <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                  <h2 className="text-sm font-semibold truncate">{v.name}</h2>
-                  <Badge variant={sm.badge} className="text-[10px]">{sm.label}</Badge>
-                  <Badge variant="outline" className="text-[10px] capitalize">{v.category === "new" ? t("status.new") : t("status.used")}</Badge>
+                <div className="flex flex-wrap items-center gap-1 mb-0.5 md:mb-1">
+                  <h2 className="text-xs md:text-sm font-semibold truncate">{v.name}</h2>
+                  <Badge variant={sm.badge} className="text-[9px] md:text-[10px]">{sm.label}</Badge>
+                  <Badge variant="outline" className="text-[9px] md:text-[10px] capitalize">{v.category === "new" ? t("status.new") : t("status.used")}</Badge>
                 </div>
-                <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                  <span className="mono text-[10px] text-muted-foreground/60">{v.id}</span>
-                  <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{v.branch}</span>
-                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{v.year}</span>
-                  <span className="flex items-center gap-1"><Gauge className="w-3 h-3" />{fmtKm(v.mileage)}</span>
+                <div className="flex flex-wrap gap-1 md:gap-3 text-[10px] md:text-xs text-muted-foreground">
+                  <span className="mono text-[9px] md:text-[10px] text-muted-foreground/60">{v.id}</span>
+                  <span className="flex items-center gap-0.5 md:gap-1"><MapPin className="w-2.5 h-2.5 md:w-3 md:h-3" />{v.branch}</span>
+                  <span className="flex items-center gap-0.5 md:gap-1"><Calendar className="w-2.5 h-2.5 md:w-3 md:h-3" />{v.year}</span>
+                  <span className="flex items-center gap-0.5 md:gap-1 hidden md:flex"><Gauge className="w-2.5 h-2.5 md:w-3 md:h-3" />{fmtKm(v.mileage)}</span>
                 </div>
               </div>
             </div>
 
             <div className="text-right flex-shrink-0">
-              <div className="flex items-end gap-4">
+              <div className="flex items-end gap-2 md:gap-4">
                 <div className={cn(
-                  "rounded-xl px-4 py-2 border-2",
+                  "rounded-xl px-2 md:px-4 py-1.5 md:py-2 border-2",
                   v.recommended_price && v.recommended_price < v.price ? "bg-secondary border-border" : "bg-secondary border-border"
                 )}>
-                  <div className="text-[10px] text-muted-foreground mb-1">{t("detail.askingPrice")}</div>
-                  <div className="text-xl font-bold text-foreground">{fmt(v.price)}</div>
+                  <div className="text-[9px] md:text-[10px] text-muted-foreground mb-0.5 md:mb-1">{t("detail.askingPrice")}</div>
+                  <div className="text-base md:text-xl font-bold text-foreground">{fmt(v.price)}</div>
                 </div>
                 {v.recommended_price && v.recommended_price < v.price ? (
-                  <div className="bg-gradient-to-r from-brand to-red-500 rounded-xl px-4 py-2 text-white">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <TrendingDown className="w-3.5 h-3.5" />
-                      <span className="text-[10px] font-semibold uppercase tracking-wide">{t("detail.advised")}</span>
+                  <div className="bg-gradient-to-r from-brand to-red-500 rounded-xl px-2 md:px-4 py-1.5 md:py-2 text-white">
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <TrendingDown className="w-3 h-3.5" />
+                      <span className="text-[9px] md:text-[10px] font-semibold uppercase tracking-wide">{t("detail.advised")}</span>
                     </div>
-                    <div className="text-xl font-bold">{fmt(v.recommended_price)}</div>
-                    <div className="text-[10px] opacity-90 mt-0.5">
+                    <div className="text-base md:text-xl font-bold">{fmt(v.recommended_price)}</div>
+                    <div className="text-[9px] md:text-[10px] opacity-90 mt-0.5">
                       {t("detail.save")} {fmt(v.price - v.recommended_price)} ({Math.round((v.price - v.recommended_price) / v.price * 100)}%)
                     </div>
                   </div>
                 ) : v.recommended_price ? (
                   <div className={cn(
-                    "rounded-xl px-4 py-2 text-white",
+                    "rounded-xl px-2 md:px-4 py-1.5 md:py-2 text-white",
                     v.recommended_price < v.price ? "bg-gradient-to-r from-brand to-red-500" : "bg-emerald-500"
                   )}>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span className="text-[10px] font-semibold uppercase tracking-wide">{t("detail.wellPriced")}</span>
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <Sparkles className="w-3 h-3.5" />
+                      <span className="text-[9px] md:text-[10px] font-semibold uppercase tracking-wide">{t("detail.wellPriced")}</span>
                     </div>
-                    <div className="text-xl font-bold">{fmt(v.recommended_price)}</div>
+                    <div className="text-base md:text-xl font-bold">{fmt(v.recommended_price)}</div>
                   </div>
                 ) : null}
               </div>
