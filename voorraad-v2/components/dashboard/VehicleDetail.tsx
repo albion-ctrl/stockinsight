@@ -85,7 +85,10 @@ export function VehicleDetail({ vehicle: v, onToggleAction }: Props) {
 
             <div className="text-right flex-shrink-0">
               <div className="flex items-end gap-4">
-                <div>
+                <div className={cn(
+                  "rounded-xl px-4 py-2 border-2",
+                  v.recommended_price && v.recommended_price < v.price ? "bg-secondary border-border" : "bg-secondary border-border"
+                )}>
                   <div className="text-[10px] text-muted-foreground mb-1">{t("detail.askingPrice")}</div>
                   <div className="text-xl font-bold text-foreground">{fmt(v.price)}</div>
                 </div>
@@ -101,7 +104,10 @@ export function VehicleDetail({ vehicle: v, onToggleAction }: Props) {
                     </div>
                   </div>
                 ) : v.recommended_price ? (
-                  <div className="bg-emerald-500 rounded-xl px-4 py-2 text-white">
+                  <div className={cn(
+                    "rounded-xl px-4 py-2 text-white",
+                    v.recommended_price < v.price ? "bg-gradient-to-r from-brand to-red-500" : "bg-emerald-500"
+                  )}>
                     <div className="flex items-center gap-1.5 mb-1">
                       <Sparkles className="w-3.5 h-3.5" />
                       <span className="text-[10px] font-semibold uppercase tracking-wide">{t("detail.wellPriced")}</span>
