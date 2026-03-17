@@ -11,13 +11,13 @@ export default function SettingsPage() {
   const { t } = useLang();
 
   return (
-    <div className="min-h-screen bg-[#F2F3F5]">
+    <div className="min-h-screen bg-[#E2E8F0]">
       <header className="bg-white border-b border-border flex items-center px-4 py-2.5 gap-3">
         <button onClick={() => router.push('/dashboard')} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
           <ChevronLeft className="w-4 h-4" /> {t('nav.back')}
         </button>
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg brand-gradient flex items-center justify-center text-white font-bold text-xs">DE</div>
+          <img src="/logo.png" alt="Den Engelsen" className="h-8 w-auto" />
           <div>
             <div className="text-sm font-semibold leading-tight">StockInsight</div>
             <div className="text-[10px] text-muted-foreground leading-tight">Den Engelsen Commercial Vehicles</div>

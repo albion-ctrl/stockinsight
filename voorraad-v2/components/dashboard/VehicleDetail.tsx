@@ -93,7 +93,7 @@ export function VehicleDetail({ vehicle: v, onToggleAction }: Props) {
                   <div className="text-base md:text-xl font-bold text-foreground">{fmt(v.price)}</div>
                 </div>
                 {v.recommended_price && v.recommended_price < v.price ? (
-                  <div className="bg-gradient-to-r from-brand to-red-500 rounded-xl px-2 md:px-4 py-1.5 md:py-2 text-white">
+                  <div className="bg-brand rounded-xl px-2 md:px-4 py-1.5 md:py-2 text-white">
                     <div className="flex items-center gap-1 mb-0.5">
                       <TrendingDown className="w-3 h-3.5" />
                       <span className="text-[9px] md:text-[10px] font-semibold uppercase tracking-wide">{t("detail.advised")}</span>
@@ -106,7 +106,7 @@ export function VehicleDetail({ vehicle: v, onToggleAction }: Props) {
                 ) : v.recommended_price ? (
                   <div className={cn(
                     "rounded-xl px-2 md:px-4 py-1.5 md:py-2 text-white",
-                    v.recommended_price < v.price ? "bg-gradient-to-r from-brand to-red-500" : "bg-emerald-500"
+                    v.recommended_price < v.price ? "bg-brand" : "bg-emerald-500"
                   )}>
                     <div className="flex items-center gap-1 mb-0.5">
                       <Sparkles className="w-3 h-3.5" />
@@ -182,25 +182,25 @@ export function VehicleDetail({ vehicle: v, onToggleAction }: Props) {
                 {t("overview.priceAdvice")}
               </h3>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white rounded-xl p-4 border-2 border-border shadow-sm">
+                <div className="bg-brand/5 rounded-xl p-4 border-2 border-brand/30 shadow-sm">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
-                      <span className="text-xs font-bold text-muted-foreground">€</span>
+                    <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center">
+                      <span className="text-xs font-bold text-white">€</span>
                     </div>
-                    <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{t("overview.currentPrice")}</div>
+                    <div className="text-[10px] text-brand uppercase tracking-wide">{t("overview.currentPrice")}</div>
                   </div>
-                  <div className="text-2xl font-bold text-foreground">{fmt(v.price)}</div>
+                  <div className="text-2xl font-bold text-brand">{fmt(v.price)}</div>
                 </div>
                 <div className={cn(
                   "rounded-xl p-4 border-2 shadow-sm",
                   v.recommended_price && v.recommended_price < v.price 
-                    ? "bg-gradient-to-br from-brand/5 to-red-50 border-brand/30" 
-                    : "bg-emerald-50 border-emerald-200"
+                    ? "bg-brand/5 border-brand/30" 
+                    : "bg-brand/5 border-brand/30"
                 )}>
                   <div className="flex items-center gap-2 mb-2">
                     <div className={cn(
                       "w-8 h-8 rounded-lg flex items-center justify-center",
-                      v.recommended_price && v.recommended_price < v.price ? "bg-brand" : "bg-emerald-500"
+                      v.recommended_price && v.recommended_price < v.price ? "bg-brand" : "bg-brand"
                     )}>
                       {v.recommended_price && v.recommended_price < v.price ? (
                         <TrendingDown className="w-4 h-4 text-white" />
@@ -210,21 +210,22 @@ export function VehicleDetail({ vehicle: v, onToggleAction }: Props) {
                     </div>
                     <div className={cn(
                       "text-[10px] uppercase tracking-wide",
-                      v.recommended_price && v.recommended_price < v.price ? "text-brand" : "text-emerald-700"
+                      v.recommended_price && v.recommended_price < v.price ? "text-brand" : "text-brand"
                     )}>
+
                       {t("overview.marketPosition")}
                     </div>
                   </div>
                   <div className={cn(
                     "text-2xl font-bold",
-                    v.recommended_price && v.recommended_price < v.price ? "text-brand" : "text-emerald-700"
+                    v.recommended_price && v.recommended_price < v.price ? "text-brand" : "text-brand"
                   )}>
                     {v.recommended_price ? fmt(v.recommended_price) : t("overview.marketRate")}
                   </div>
                   {v.recommended_price && (
                     <div className={cn(
                       "text-[10px] mt-1",
-                      v.recommended_price < v.price ? "text-red-600" : "text-emerald-600"
+                      v.recommended_price < v.price ? "text-brand/70" : "text-brand"
                     )}>
                       {v.recommended_price < v.price ? "-" : "+"}{Math.abs(v.market_delta_pct)}% {t("overview.vsMarket")}
                     </div>

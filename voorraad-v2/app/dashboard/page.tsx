@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { fetchVehicles, computeKPIs, BRANCHES } from "@/lib/data-supabase";
 import { Vehicle, FilterState } from "@/types";
@@ -7,22 +7,28 @@ import { cn } from "@/lib/utils";
 import { useLang } from "@/lib/i18n";
 import { LangToggle } from "@/components/ui/LangToggle";
 import { KPIBar } from "@/components/dashboard/KPIBar";
-import { VehicleCard } from "@/components/dashboard/VehicleCard";
 import { VehicleDetail } from "@/components/dashboard/VehicleDetail";
-import { Search, Filter, X, ChevronDown, Truck, BarChart3, Menu, ArrowLeft } from "lucide-react";
+import { Search, Filter, X, ChevronDown, ChevronRight, Truck, BarChart3, Menu, ArrowLeft, LayoutGrid, List, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { VehicleImage } from "@/components/ui/VehicleImage";
 
 const DEMO_USER = { name: "Thomas de Vries", role: "Manager", initials: "TD" };
 
+type ViewMode = "grid" | "list";
+type GroupBy = "none" | "branch" | "brand" | "status";
+type SortBy = "days" | "price" | "mileage" | "name";
+
 export default function DashboardPage() {
   const router = useRouter();
-  const { t } = useLang();
+  const { t, fmt, fmtKm } = useLang();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<FilterState>({ branch:"all", type:"all", brand:"all", status:"all", search:"" });
-  const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [groupBy, setGroupBy] = useState<GroupBy>("none");
+  const [sortBy, setSortBy] = useState<SortBy>("days");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mobileView, setMobileView] = useState<"list" | "detail">("list");
+  const [mobileView, setMobileView] = useState<"overview" | "detail">("overview");
 
   const BRAND_OPTIONS = [
     ["all", t("filter.allBrands")],
@@ -41,7 +47,6 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchVehicles().then(data => {
       setVehicles(data);
-      if (data.length > 0) setSelectedId(data[0].id);
       setLoading(false);
     });
   }, []);
@@ -63,6 +68,38 @@ export default function DashboardPage() {
     }
     return v;
   };
+
+  const sortedVehicles = useMemo(() => {
+    const filtered = getFilteredVehicles();
+    return [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "days": return b.days_in_stock - a.days_in_stock;
+        case "price": return a.price - b.price;
+        case "mileage": return a.mileage - b.mileage;
+        case "name": return a.name.localeCompare(b.name);
+        default: return 0;
+      }
+    });
+  }, [vehicles, filters, sortBy]);
+
+  const groupedVehicles = useMemo(() => {
+    if (groupBy === "none") return { "All Vehicles": sortedVehicles };
+    
+    const groups: Record<string, Vehicle[]> = {};
+    sortedVehicles.forEach(v => {
+      let key = "";
+      switch (groupBy) {
+        case "branch": key = v.branch; break;
+        case "brand": key = v.brand; break;
+        case "status": 
+          key = v.status === "green" ? "Ready to Sell" : v.status === "amber" ? "Needs Attention" : "Urgent";
+          break;
+      }
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(v);
+    });
+    return groups;
+  }, [sortedVehicles, groupBy]);
 
   const filtered = getFilteredVehicles();
   const kpi = computeKPIs(filtered);
@@ -86,13 +123,27 @@ export default function DashboardPage() {
     setMobileView("detail");
   };
 
-  const handleBackToList = () => {
-    setMobileView("list");
+  const handleBackToOverview = () => {
+    setMobileView("overview");
   };
+
+  const FilterButton = ({ value, current, onClick, label }: { value: string; current: string; onClick: () => void; label: string }) => (
+    <button
+      onClick={onClick}
+      className={cn(
+        "px-4 py-2 rounded-full text-sm font-medium transition-all",
+        current === value 
+          ? "bg-brand text-white shadow-md" 
+          : "bg-white border border-border text-muted-foreground hover:bg-secondary"
+      )}
+    >
+      {label}
+    </button>
+  );
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-[#F2F3F5]">
+      <div className="h-screen flex items-center justify-center bg-[#E2E8F0]">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-brand/30 border-t-brand rounded-full animate-spin mx-auto mb-3" />
           <p className="text-sm text-muted-foreground">{t('general.loading')}</p>
@@ -102,7 +153,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-[#F2F3F5]">
+    <div className="h-screen flex flex-col overflow-hidden bg-[#E2E8F0]">
       <header className="bg-white border-b border-border flex items-center px-3 py-2 gap-2 flex-shrink-0 z-20">
         <button 
           onClick={() => setMobileMenuOpen(true)}
@@ -111,7 +162,7 @@ export default function DashboardPage() {
           <Menu className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg brand-gradient flex items-center justify-center text-white font-bold text-xs">DE</div>
+          <img src="/logo.png" alt="Den Engelsen" className="h-8 w-auto" />
           <div className="hidden sm:block">
             <div className="text-sm font-semibold leading-tight">StockInsight</div>
             <div className="text-[10px] text-muted-foreground leading-tight">Den Engelsen Commercial Vehicles</div>
@@ -139,93 +190,247 @@ export default function DashboardPage() {
       <KPIBar kpi={kpi} />
 
       <div className="flex flex-1 overflow-hidden relative">
-        <aside className={cn(
-          "w-full lg:w-[340px] flex-shrink-0 flex flex-col bg-white border-r border-border overflow-hidden absolute lg:relative inset-0 z-10 transition-transform duration-300",
-          mobileView === "list" ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        <main className={cn(
+          "flex-1 overflow-hidden absolute lg:relative inset-0 transition-transform duration-300",
+          mobileView === "overview" ? "translate-x-0" : "translate-x-full lg:translate-x-0"
         )}>
-          <div className="p-3 border-b border-border space-y-2 flex-shrink-0">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder={t('filter.search')}
-                value={filters.search}
-                onChange={e => setFilters(f => ({...f, search: e.target.value}))}
-                className="w-full pl-8 pr-8 py-1.5 text-xs bg-secondary rounded-md border-0 outline-none focus:ring-1 focus:ring-brand/30 placeholder:text-muted-foreground"
-              />
-              {filters.search && (
-                <button onClick={() => setFilters(f => ({...f, search:""}))} className="absolute right-2.5 top-1/2 -translate-y-1/2">
-                  <X className="w-3 h-3 text-muted-foreground" />
-                </button>
-              )}
+          <div className="h-full flex flex-col overflow-hidden">
+            <div className="lg:hidden flex items-center gap-2 px-3 py-2 bg-white border-b border-border flex-shrink-0">
+              <button onClick={handleBackToOverview} className="p-1 hover:bg-secondary rounded-md">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <span className="text-sm font-medium truncate">{t('vehicleList.selectVehicle')}</span>
             </div>
-            <button
-              onClick={() => setShowFilters(s => !s)}
-              className={cn("flex items-center gap-1.5 text-xs px-2 py-1.5 rounded-md w-full transition-colors",
-                showFilters || activeFilters > 0 ? "bg-brand/5 text-brand" : "text-muted-foreground hover:bg-secondary")}
-            >
-              <Filter className="w-3 h-3" />
-              {t('filter.filters')}
-              {activeFilters > 0 && <span className="bg-brand text-white rounded-full px-1.5 text-[10px] leading-4">{activeFilters}</span>}
-              <ChevronDown className={cn("w-3 h-3 ml-auto transition-transform", showFilters && "rotate-180")} />
-            </button>
 
-            {showFilters && (
-              <div className="grid grid-cols-2 gap-x-3 gap-y-2 animate-fade-in">
-                {[
-                  { key:"branch", label: t('filter.branch'), opts:[["all", t('filter.allBranches')], ...BRANCHES.map(b=>[b,b])] as [string,string][] },
-                  { key:"type", label: t('filter.type'), opts:[["all", t('filter.allTypes')],["truck", t('filter.truck')],["van", t('filter.van')]] as [string,string][] },
-                  { key:"brand", label: t('filter.brand'), opts: BRAND_OPTIONS as [string,string][] },
-                  { key:"status", label: t('filter.status'), opts:[["all", t('filter.allStatuses')],["green", t('filter.green')],["amber", t('filter.amber')],["red", t('filter.red')]] as [string,string][] },
-                ].map(({key, label, opts}) => (
-                  <div key={key}>
-                    <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide block mb-0.5">{label}</label>
-                    <select
-                      value={(filters as any)[key]}
-                      onChange={e => setFilters(f => ({...f, [key]: e.target.value}))}
-                      className="w-full text-xs bg-secondary border-0 rounded px-2 py-1.5 outline-none focus:ring-1 focus:ring-brand/30 truncate"
-                    >
-                      {opts.map(([v,l]) => <option key={v} value={v}>{l}</option>)}
-                    </select>
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-4 space-y-4">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div className="relative flex-1 min-w-[200px] max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder={t('filter.searchNew')}
+                      value={filters.search}
+                      onChange={e => setFilters(f => ({...f, search: e.target.value}))}
+                      className="w-full pl-9 pr-9 py-2 text-sm bg-white rounded-lg border border-border outline-none focus:ring-2 focus:ring-brand/30 placeholder:text-muted-foreground shadow-sm"
+                    />
+                    {filters.search && (
+                      <button onClick={() => setFilters(f => ({...f, search:""}))} className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <X className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    )}
                   </div>
-                ))}
-                {activeFilters > 0 && (
+                  
+                  <div className="flex items-center gap-1 bg-white rounded-lg border border-border p-1">
+                    <button
+                      onClick={() => setViewMode("grid")}
+                      className={cn("p-1.5 rounded", viewMode === "grid" ? "bg-brand text-white" : "text-muted-foreground hover:bg-secondary")}
+                    >
+                      <LayoutGrid className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode("list")}
+                      className={cn("p-1.5 rounded", viewMode === "list" ? "bg-brand text-white" : "text-muted-foreground hover:bg-secondary")}
+                    >
+                      <List className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-medium text-muted-foreground">{t('filter.filterBy')}</span>
                   <button
-                    onClick={() => setFilters({branch:"all",type:"all",brand:"all",status:"all",search:""})}
-                    className="col-span-2 text-xs text-brand hover:underline text-left px-1"
+                    onClick={() => setFilters(f => ({...f, branch: f.branch === "all" ? BRANCHES[0] : f.branch === BRANCHES[0] ? "all" : "all"}))}
+                    className={cn(
+                      "px-4 py-2 rounded-full text-sm font-medium transition-all",
+                      filters.branch !== "all" ? "bg-brand text-white shadow-md" : "bg-white border border-border text-muted-foreground hover:bg-secondary"
+                    )}
                   >
-                    {t('filter.clearFilters')}
+                    {filters.branch === "all" ? t('filter.allBranches') : filters.branch}
                   </button>
+                  <button
+                    onClick={() => setFilters(f => ({...f, type: f.type === "all" ? "truck" : f.type === "truck" ? "van" : f.type === "van" ? "all" : "all"}))}
+                    className={cn(
+                      "px-4 py-2 rounded-full text-sm font-medium transition-all",
+                      filters.type !== "all" ? "bg-brand text-white shadow-md" : "bg-white border border-border text-muted-foreground hover:bg-secondary"
+                    )}
+                  >
+                    {filters.type === "all" ? t('filter.allTypes') : filters.type === "truck" ? t('filter.truck') : t('filter.van')}
+                  </button>
+                  <button
+                    onClick={() => setFilters(f => ({...f, status: f.status === "all" ? "green" : f.status === "green" ? "amber" : f.status === "amber" ? "red" : "all"}))}
+                    className={cn(
+                      "px-4 py-2 rounded-full text-sm font-medium transition-all",
+                      filters.status !== "all" ? "bg-brand text-white shadow-md" : "bg-white border border-border text-muted-foreground hover:bg-secondary"
+                    )}
+                  >
+                    {filters.status === "all" ? t('filter.allStatuses') : 
+                     filters.status === "green" ? t('filter.ready') : 
+                     filters.status === "amber" ? t('filter.attention') : t('filter.urgent')}
+                  </button>
+                  
+                  {activeFilters > 0 && (
+                    <button
+                      onClick={() => setFilters({branch:"all",type:"all",brand:"all",status:"all",search:""})}
+                      className="text-sm text-brand hover:underline"
+                    >
+                      {t('filter.clearAll')}
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="text-sm font-medium text-muted-foreground">{t('filter.groupBy')}</span>
+                  <select
+                    value={groupBy}
+                    onChange={e => setGroupBy(e.target.value as GroupBy)}
+                    className="text-sm bg-white border border-border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand/30"
+                  >
+                    <option value="none">{t('filter.noGrouping')}</option>
+                    <option value="branch">{t('filter.byBranch')}</option>
+                    <option value="brand">{t('filter.byBrand')}</option>
+                    <option value="status">{t('filter.byStatus')}</option>
+                  </select>
+
+                  <span className="text-sm font-medium text-muted-foreground ml-4">{t('filter.sortBy')}</span>
+                  <select
+                    value={sortBy}
+                    onChange={e => setSortBy(e.target.value as SortBy)}
+                    className="text-sm bg-white border border-border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand/30"
+                  >
+                    <option value="days">{t('filter.daysNewest')}</option>
+                    <option value="price">{t('filter.priceLowHigh')}</option>
+                    <option value="mileage">{t('filter.mileageLowHigh')}</option>
+                    <option value="name">{t('filter.nameAZ')}</option>
+                  </select>
+                </div>
+
+                <div className="text-sm text-muted-foreground">
+                  {t('filter.showing').replace('X', String(sortedVehicles.length)).replace('Y', String(vehicles.length))}
+                </div>
+
+                <div className="space-y-6">
+                  {Object.entries(groupedVehicles).map(([groupName, groupVehicles]) => (
+                    <div key={groupName}>
+                      {groupBy !== "none" && (
+                        <div className="flex items-center gap-2 mb-3">
+                          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm font-semibold">{groupName}</span>
+                          <span className="text-xs text-muted-foreground">({groupVehicles.length})</span>
+                        </div>
+                      )}
+                      
+                      {viewMode === "grid" ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                          {groupVehicles.map(v => (
+                            <button
+                              key={v.id}
+                              onClick={() => handleVehicleSelect(v.id)}
+                              className={cn(
+                                "bg-white rounded-xl border border-border p-4 text-left hover:shadow-lg transition-all hover:border-brand/50",
+                                selectedId === v.id && "ring-2 ring-brand border-brand"
+                              )}
+                            >
+                              <div className="aspect-video bg-secondary rounded-lg mb-3 overflow-hidden">
+                                <VehicleImage
+                                  src={v.image_url}
+                                  alt={v.name}
+                                  brand={v.brand}
+                                  type={v.type}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex items-start justify-between gap-2">
+                                  <h3 className="font-semibold text-sm truncate">{v.name}</h3>
+                                  <span className={cn(
+                                    "px-2 py-0.5 rounded-full text-xs font-medium",
+                                    v.status === "green" && "bg-green-100 text-green-700",
+                                    v.status === "amber" && "bg-amber-100 text-amber-700",
+                                    v.status === "red" && "bg-red-100 text-red-700"
+                                  )}>
+                                    {v.days_in_stock}d
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <span className="flex items-center gap-1">
+                                    <Truck className="w-3 h-3" />
+                                    {v.branch}
+                                  </span>
+                                  <span>·</span>
+                                  <span>{v.year}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="font-bold text-sm">{fmt(v.price)}</span>
+                                  <span className="text-xs text-muted-foreground">{fmtKm(v.mileage)}</span>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {groupVehicles.map(v => (
+                            <button
+                              key={v.id}
+                              onClick={() => handleVehicleSelect(v.id)}
+                              className={cn(
+                                "w-full bg-white rounded-lg border border-border p-3 text-left hover:shadow-md transition-all flex items-center gap-4",
+                                selectedId === v.id && "ring-2 ring-brand border-brand"
+                              )}
+                            >
+                              <div className="w-20 h-14 bg-secondary rounded-lg overflow-hidden flex-shrink-0">
+                                <VehicleImage
+                                  src={v.image_url}
+                                  alt={v.name}
+                                  brand={v.brand}
+                                  type={v.type}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between">
+                                  <h3 className="font-semibold text-sm truncate">{v.name}</h3>
+                                  <span className={cn(
+                                    "px-2 py-0.5 rounded-full text-xs font-medium ml-2",
+                                    v.status === "green" && "bg-green-100 text-green-700",
+                                    v.status === "amber" && "bg-amber-100 text-amber-700",
+                                    v.status === "red" && "bg-red-100 text-red-700"
+                                  )}>
+                                    {v.days_in_stock}d
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                                  <span>{v.branch}</span>
+                                  <span>·</span>
+                                  <span>{v.year}</span>
+                                  <span>·</span>
+                                  <span>{fmtKm(v.mileage)}</span>
+                                </div>
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                <div className="font-bold">{fmt(v.price)}</div>
+                              </div>
+                              <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {sortedVehicles.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                    <Truck className="w-16 h-16 opacity-20 mb-4" />
+                    <p className="text-lg font-medium">{t('filter.noVehicles')}</p>
+                    <p className="text-sm">{t('filter.adjustFilters')}</p>
+                  </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
-
-          <div className="px-3 py-2 flex items-center justify-between flex-shrink-0 border-b border-border/50">
-            <span className="text-[10px] text-muted-foreground">{filtered.length} {t('vehicleList.count')}</span>
-            <span className="text-[10px] text-muted-foreground">{t('vehicleList.sortedBy')} ↓</span>
-          </div>
-
-          <div className="flex-1 overflow-y-auto thin-scroll">
-            {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-40 gap-2 text-muted-foreground">
-                <Truck className="w-8 h-8 opacity-20" />
-                <span className="text-xs">{t('vehicleList.noVehicles')}</span>
-              </div>
-            ) : (
-              <div className="divide-y divide-border">
-                {filtered.map(v => (
-                  <VehicleCard
-                    key={v.id}
-                    vehicle={v}
-                    isSelected={selectedId === v.id}
-                    onClick={() => handleVehicleSelect(v.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </aside>
+        </main>
 
         <main className={cn(
           "flex-1 overflow-hidden absolute lg:relative inset-0 transition-transform duration-300",
@@ -234,7 +439,7 @@ export default function DashboardPage() {
           {selected ? (
             <div className="h-full flex flex-col">
               <div className="lg:hidden flex items-center gap-2 px-3 py-2 bg-white border-b border-border flex-shrink-0">
-                <button onClick={handleBackToList} className="p-1 hover:bg-secondary rounded-md">
+                <button onClick={handleBackToOverview} className="p-1 hover:bg-secondary rounded-md">
                   <ArrowLeft className="w-5 h-5" />
                 </button>
                 <span className="text-sm font-medium truncate">{selected.name}</span>
