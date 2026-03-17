@@ -2,7 +2,7 @@
 import { KPISnapshot } from "@/types";
 import { cn } from "@/lib/utils";
 import { useLang } from "@/lib/i18n";
-import { AlertCircle, TrendingDown, Clock, Package, Euro, BarChart3 } from "lucide-react";
+import { AlertCircle, TrendingDown, Clock, Package, BarChart3, Flame } from "lucide-react";
 
 interface Props { kpi: KPISnapshot; }
 
@@ -19,7 +19,7 @@ export function KPIBar({ kpi }: Props) {
       border: "border-transparent",
     },
     {
-      icon: <Euro className="w-4 h-4" />,
+      icon: <Flame className="w-4 h-4" />,
       label: t("kpi.totalInterestCost"),
       value: fmt(kpi.total_interest_cost),
       color: "text-red-600",

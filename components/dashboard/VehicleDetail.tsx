@@ -8,12 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import {
   MapPin, Calendar, Gauge, TrendingDown, TrendingUp, CheckCircle2, Circle,
   ExternalLink, AlertTriangle, Flame, ArrowDownRight, Camera,
-  Phone, Globe, BarChart2, Clock, Sparkles
+  Phone, Globe, BarChart2, Clock, Sparkles, Check
 } from "lucide-react";
 
 interface Props {
   vehicle: Vehicle;
   onToggleAction: (vehicleId: string, actionId: string, completed: boolean) => void;
+  onUpdatePrice?: (vehicleId: string, newPrice: number) => void;
 }
 
 const ACTION_ICONS: Record<ActionType, React.ReactNode> = {
@@ -23,7 +24,7 @@ const ACTION_ICONS: Record<ActionType, React.ReactNode> = {
   export_platform: <Globe className="w-4 h-4" />,
 };
 
-export function VehicleDetail({ vehicle: v, onToggleAction }: Props) {
+export function VehicleDetail({ vehicle: v, onToggleAction, onUpdatePrice }: Props) {
   const { t, fmt, fmtKm, lang } = useLang();
   
   const STATUS_MAP = {
@@ -165,10 +166,19 @@ export function VehicleDetail({ vehicle: v, onToggleAction }: Props) {
                     }
                   </p>
                   {v.recommended_price && v.recommended_price < v.price && (
-                    <div className="mt-3 flex items-center gap-2">
+                    <div className="mt-3 flex items-center gap-2 flex-wrap">
                       <span className="text-xs text-violet-600">{lang === "nl" ? "Voorgestelde prijs:" : "Suggested price:"}</span>
                       <span className="text-sm font-bold text-violet-900">{fmt(v.recommended_price)}</span>
                       <span className="text-xs text-violet-500">({t("detail.save")} {fmt(v.price - v.recommended_price)})</span>
+                      {onUpdatePrice && (
+                        <button
+                          onClick={() => onUpdatePrice(v.id, v.recommended_price!)}
+                          className="ml-auto flex items-center gap-1 px-3 py-1.5 bg-brand text-white text-xs font-medium rounded-lg hover:opacity-90 transition-opacity"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          {lang === "nl" ? "Pas prijs aan" : "Apply price"}
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -294,7 +304,12 @@ export function VehicleDetail({ vehicle: v, onToggleAction }: Props) {
                     {pending.map(action => (
                       <button
                         key={action.id}
-                        onClick={() => onToggleAction(v.id, action.id, true)}
+                        onClick={() => {
+                          onToggleAction(v.id, action.id, true);
+                          if (action.action_type === 'price_reduction' && v.recommended_price && onUpdatePrice) {
+                            onUpdatePrice(v.id, v.recommended_price);
+                          }
+                        }}
                         className="w-full flex items-start gap-3 p-3 bg-white border border-border rounded-lg hover:border-brand/30 hover:bg-brand/5 transition-colors text-left"
                       >
                         <Circle className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />

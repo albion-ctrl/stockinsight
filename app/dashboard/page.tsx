@@ -118,6 +118,18 @@ export default function DashboardPage() {
     }));
   };
 
+  const handleUpdatePrice = (vehicleId: string, newPrice: number) => {
+    setVehicles(prev => prev.map(v => {
+      if (v.id !== vehicleId) return v;
+      const newActions = (v.action_items ?? []).map(a => 
+        a.action_type === 'price_reduction'
+          ? { ...a, completed: true, completed_by: DEMO_USER.name, completed_at: new Date().toISOString() }
+          : a
+      );
+      return { ...v, price: newPrice, action_items: newActions, pending_actions: newActions.filter(a => !a.completed).length };
+    }));
+  };
+
   const handleVehicleSelect = (id: string) => {
     setSelectedId(id);
     setMobileView("detail");
@@ -204,15 +216,15 @@ export default function DashboardPage() {
 
             <div className="flex-1 overflow-y-auto">
               <div className="p-4 space-y-4">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <div className="relative flex-1 min-w-[200px] max-w-md">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <div className="relative flex-1 w-full">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                       type="text"
                       placeholder={t('filter.searchNew')}
                       value={filters.search}
                       onChange={e => setFilters(f => ({...f, search: e.target.value}))}
-                      className="w-full pl-9 pr-9 py-2 text-sm bg-white rounded-lg border border-border outline-none focus:ring-2 focus:ring-brand/30 placeholder:text-muted-foreground shadow-sm"
+                      className="w-full pl-9 pr-9 py-2.5 sm:py-2 text-sm bg-white rounded-lg border border-border outline-none focus:ring-2 focus:ring-brand/30 placeholder:text-muted-foreground shadow-sm"
                     />
                     {filters.search && (
                       <button onClick={() => setFilters(f => ({...f, search:""}))} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -221,7 +233,7 @@ export default function DashboardPage() {
                     )}
                   </div>
                   
-                  <div className="flex items-center gap-1 bg-white rounded-lg border border-border p-1">
+                  <div className="flex items-center gap-1 bg-white rounded-lg border border-border p-1 self-start sm:self-center">
                     <button
                       onClick={() => setViewMode("grid")}
                       className={cn("p-1.5 rounded", viewMode === "grid" ? "bg-brand text-white" : "text-muted-foreground hover:bg-secondary")}
@@ -445,7 +457,7 @@ export default function DashboardPage() {
                 <span className="text-sm font-medium truncate">{selected.name}</span>
               </div>
               <div className="flex-1 overflow-hidden">
-                <VehicleDetail vehicle={selected} onToggleAction={toggleAction} />
+                <VehicleDetail vehicle={selected} onToggleAction={toggleAction} onUpdatePrice={handleUpdatePrice} />
               </div>
             </div>
           ) : (

@@ -63,7 +63,7 @@ export default function ReportsPage() {
               </div>
               <BarChart3 className="w-5 h-5 text-muted-foreground" />
             </div>
-            <p className="text-xs text-muted-foreground">{t('reports.totalInterest')}: €12,450</p>
+            <p className="text-xs text-muted-foreground">{t('reports.totalInterest')}: 12,450</p>
           </div>
 
           <div className="bg-white rounded-xl border border-border p-6">
