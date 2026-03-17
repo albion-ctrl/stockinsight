@@ -363,7 +363,7 @@ export default function DashboardPage() {
                   <span className="text-sm font-medium text-muted-foreground">{t('filter.filterBy')}</span>
                   <select
                     value={filters.branch}
-                    onChange={e => setFilters(f => ({...f, branch: e.target.value}))}
+                    onChange={e => setFilters(f => ({...f, branch: e.target.value as typeof f.branch}))}
                     className="text-sm bg-white border border-border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand/30"
                   >
                     <option value="all">{t('filter.allBranches')}</option>
@@ -373,7 +373,7 @@ export default function DashboardPage() {
                   </select>
                   <select
                     value={filters.type}
-                    onChange={e => setFilters(f => ({...f, type: e.target.value}))}
+                    onChange={e => setFilters(f => ({...f, type: e.target.value as typeof f.type}))}
                     className="text-sm bg-white border border-border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand/30"
                   >
                     <option value="all">{t('filter.allTypes')}</option>
@@ -382,7 +382,7 @@ export default function DashboardPage() {
                   </select>
                   <select
                     value={filters.status}
-                    onChange={e => setFilters(f => ({...f, status: e.target.value}))}
+                    onChange={e => setFilters(f => ({...f, status: e.target.value as typeof f.status}))}
                     className="text-sm bg-white border border-border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand/30"
                   >
                     <option value="all">{t('filter.allStatuses')}</option>
