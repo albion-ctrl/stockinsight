@@ -5,6 +5,6 @@
   },
   "deploy": {
     "numReplicas": 1,
-    "startCommand": "cd voorraad-v2 && npm run start"
+    "startCommand": "npm run start"
   }
 }
